@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { API } from '../config.js';
 
-const API = '/api';
 
 export default function ProviderDashboard() {
   const { fetchWithAuth, profile } = useAuth();

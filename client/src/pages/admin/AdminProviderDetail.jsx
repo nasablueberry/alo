@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
+import { API } from '../../config.js';
 
-const API = '/api';
 
 const TYPES = [
   { value: 'ngo', label: 'NGO' },

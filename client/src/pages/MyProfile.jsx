@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import { API } from '../config.js';
 
-const API = '/api';
 
 const SCORE_COLOR = (score) => {
   if (score >= 75) return '#16a34a';
@@ -144,7 +144,7 @@ export default function MyProfile() {
       if (diff > 0) {
         toast.success(`Profile saved! Eligibility score ↑ ${diff} pts (${newScore}/100)`);
       } else if (diff < 0) {
-        toast(`Profile saved. Eligibility score ↓ ${Math.abs(diff)} pts (${newScore}/100)`, { icon: '📉' });
+        toast.success(`Profile saved. Eligibility score ↓ ${Math.abs(diff)} pts (${newScore}/100)`);
       } else {
         toast.success('Profile saved successfully');
       }
@@ -169,6 +169,9 @@ export default function MyProfile() {
   }
 
   const score = profile?.financialNeedScore ?? 0;
+  const docCount = (profile?.documents && profile.documents.length) ? profile.documents.length : 0;
+  const docBonus = Math.min(20, docCount * 5); // each document adds 5 pts, capped at 20
+  const combinedScore = Math.min(100, score + docBonus);
   const lastUpdated = profile?.lastNeedScoreUpdate
     ? new Date(profile.lastNeedScoreUpdate).toLocaleDateString()
     : null;
@@ -183,16 +186,26 @@ export default function MyProfile() {
       {/* Score + identity summary card */}
       <div className="card" style={{ marginBottom: '1.25rem' }}>
         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <ScoreRing score={score} />
+          <ScoreRing score={combinedScore} />
           <div style={{ flex: 1 }}>
             <h2 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0 0 0.3rem' }}>
               Eligibility Score
             </h2>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '0 0 0.6rem' }}>
-              Calculated from household income, family size, CGPA, attendance, and verified documents.
+              Your score is calculated based on various factors.
               {lastUpdated && <> Last updated: <strong>{lastUpdated}</strong>.</>}
             </p>
             <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+              <div style={{
+                padding: '0.35rem 0.75rem',
+                borderRadius: '0.5rem',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                background: 'transparent',
+                color: 'var(--text-muted)'
+              }}>
+                Documents: {docCount} {docBonus ? `(+${docBonus} pts)` : ''}
+              </div>
               <div style={{
                 padding: '0.35rem 0.75rem',
                 borderRadius: '0.5rem',
@@ -200,7 +213,7 @@ export default function MyProfile() {
                 fontSize: '0.8rem',
                 fontWeight: 600,
               }}>
-                🪪 ID: <span style={{ color: 'var(--text)' }}>{profile?.birthCertificateId ?? '—'}</span>
+                ID: <span style={{ color: 'var(--text)' }}>{profile?.birthCertificateId ?? '—'}</span>
               </div>
               <div style={{
                 padding: '0.35rem 0.75rem',
@@ -220,20 +233,8 @@ export default function MyProfile() {
               }}>
                 {profile?.verificationStatus === 'verified' ? '✓ Verified' :
                   profile?.verificationStatus === 'rejected' ? '✗ Rejected' :
-                    profile?.verificationStatus === 'unverified' ? '— Unverified' : '⏳ Pending'}
+                    profile?.verificationStatus === 'unverified' ? '— Unverified' : 'Pending'}
               </div>
-            </div>
-
-            {/* Score breakdown hint */}
-            <div style={{
-              marginTop: '0.75rem',
-              display: 'flex', gap: '0.5rem', flexWrap: 'wrap',
-              fontSize: '0.75rem', color: 'var(--text-muted)',
-            }}>
-              <span>📊 Income (40%)</span>
-              <span>👨‍👩‍👧 Family (20%)</span>
-              <span>🎓 Academics (30%)</span>
-              <span>📄 Documents (10%)</span>
             </div>
           </div>
         </div>
@@ -259,7 +260,6 @@ export default function MyProfile() {
                 <option value="">— Select —</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
-                <option value="other">Other</option>
               </select>
             </Field>
           </div>
@@ -300,33 +300,21 @@ export default function MyProfile() {
         <div className="card" style={{ marginBottom: '1rem' }}>
           <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
             Financial Information
-            <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', background: 'rgba(220,38,38,0.1)', color: '#b91c1c', borderRadius: '0.3rem', padding: '0.1rem 0.4rem', fontWeight: 700 }}>
-              Affects score
-            </span>
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <Field label="Monthly Household Income (BDT)" name="householdIncome" type="number" value={form.householdIncome} onChange={handleChange} min={0} />
             <Field label="Family Size" name="familySize" type="number" value={form.familySize} onChange={handleChange} min={1} />
           </div>
-          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-            💡 Lower income and larger family size = higher financial need score.
-          </p>
         </div>
 
         <div className="card" style={{ marginBottom: '1.5rem' }}>
           <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
             Academic Performance
-            <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', background: 'rgba(22,163,74,0.1)', color: '#15803d', borderRadius: '0.3rem', padding: '0.1rem 0.4rem', fontWeight: 700 }}>
-              Boosts score
-            </span>
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <Field label="Attendance %" name="attendancePercentage" type="number" value={form.attendancePercentage} onChange={handleChange} min={0} max={100} />
             <Field label="CGPA (0–4)" name="cgpa" type="number" value={form.cgpa} onChange={handleChange} min={0} max={4} step={0.01} />
           </div>
-          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-            💡 Higher CGPA and attendance show academic merit, boosting your eligibility score.
-          </p>
         </div>
 
         <button

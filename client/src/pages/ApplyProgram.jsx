@@ -3,8 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { uploadUrl } from '../utils/uploadUrl';
+import { API } from '../config.js';
 
-const API = '/api';
 
 const emptyPreference = { method: '', mobileNumber: '', bankName: '', accountName: '', accountNumber: '', branch: '', routingNumber: '' };
 
@@ -274,13 +274,19 @@ export default function ApplyProgram() {
             <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '0.75rem' }}>
               PDF, JPG, PNG, or Word files. At least one document is required before you submit.
             </p>
-            <input
+            <label style={{ display: 'block', marginBottom: '0.35rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>Document type</label>
+            <select
               className="form-input"
-              style={{ marginBottom: '0.5rem' }}
-              placeholder="Label (e.g. transcript)"
+              style={{ marginBottom: '0.5rem', maxWidth: '320px' }}
               value={docLabel}
               onChange={(e) => setDocLabel(e.target.value)}
-            />
+            >
+              <option value="">Select document type…</option>
+              <option value="NID/Birth Certificate">NID/Birth Certificate</option>
+              <option value="Institutional ID">Institutional ID</option>
+              <option value="Testimonial">Testimonial</option>
+              <option value="Latest Gradesheet">Latest Gradesheet</option>
+            </select>
             <input type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onChange={uploadDoc} />
             <ul style={{ marginTop: '0.75rem', paddingLeft: '1.25rem' }}>
               {(application.applicationDocuments || []).map((d) => (

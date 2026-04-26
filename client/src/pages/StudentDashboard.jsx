@@ -3,8 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import StudentWithdrawPanel from '../components/StudentWithdrawPanel';
+import { API } from '../config.js';
 
-const API = '/api';
 
 export default function StudentDashboard() {
   const { fetchWithAuth, profile, loadUser } = useAuth();
@@ -76,6 +76,31 @@ export default function StudentDashboard() {
     }
   }, [location.hash, location.pathname]);
 
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadReport = async () => {
+    try {
+      setDownloading(true);
+      const res = await fetchWithAuth(API + '/students/report');
+      if (!res.ok) throw new Error('Failed to download report');
+      
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `student-report-${new Date().getTime()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error(error);
+      alert('Error downloading report');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const pending = stats.applications.filter((a) => a.status === 'pending').length;
   const approved = stats.applications.filter((a) => a.status === 'approved').length;
 
@@ -117,12 +142,21 @@ export default function StudentDashboard() {
               <p className="dash-page-name">{profile.fullName}</p>
               <p className="dash-page-sub">ID: {profile.birthCertificateId}</p>
             </div>
+            <button 
+              className="btn btn-secondary" 
+              onClick={handleDownloadReport}
+              disabled={downloading}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}
+            >
+              <span className="material-symbols-outlined">download</span>
+              {downloading ? 'Downloading...' : 'Download Report (PDF)'}
+            </button>
           </div>
         )}
       </header>
 
       <div className="dash-bento">
-        <section className="dash-card dash-card--hero dash-span-8">
+        <section className="dash-card dash-card--hero dash-span-8" style={{ position: 'relative', overflow: 'hidden' }}>
           <div className="dash-card-glow" aria-hidden />
           <div className="dash-hero-inner">
             <div className="dash-hero-main">

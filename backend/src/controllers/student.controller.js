@@ -3,6 +3,8 @@ import StudentWithdrawal from '../models/StudentWithdrawal.model.js';
 import Application from '../models/Application.model.js';
 import { updateStudentFinancialNeedScore } from '../services/financialNeedScore.service.js';
 import { createAuditLog } from '../utils/auditLog.js';
+import PDFDocument from 'pdfkit';
+import { stringify } from 'csv-stringify/sync';
 
 export const getMyProfile = async (req, res, next) => {
   try {
@@ -196,3 +198,65 @@ export const createWithdrawal = async (req, res, next) => {
     next(err);
   }
 };
+
+export const generateStudentReport = async (req, res, next) => {
+  try {
+    const profile = await StudentProfile.findOne({ user: req.user._id });
+    if (!profile) return res.status(404).json({ message: 'Profile not found' });
+
+    const Disbursement = (await import('../models/Disbursement.model.js')).default;
+    const applications = await Application.find({ student: profile._id })
+      .populate('program', 'title')
+      .lean();
+
+    const disbursements = await Disbursement.find({ student: profile._id })
+      .populate('program', 'title')
+      .sort({ releaseDate: -1 })
+      .lean();
+      
+    const withdrawals = await StudentWithdrawal.find({ student: profile._id })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const doc = new PDFDocument();
+    
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=student-report-${Date.now()}.pdf`);
+    
+    doc.pipe(res);
+    
+    doc.fontSize(20).text('Student Dashboard Report', { align: 'center' });
+    doc.moveDown();
+    
+    doc.fontSize(14).text(`Name: ${profile.fullName}`);
+    doc.text(`ID: ${profile.birthCertificateId}`);
+    doc.text(`Institution: ${profile.institutionName}`);
+    doc.text(`Current Balance: BDT ${profile.accountBalance || 0}`);
+    doc.moveDown();
+    
+    doc.fontSize(16).text('Applications', { underline: true });
+    applications.forEach(app => {
+      doc.fontSize(12).text(`- ${app.program?.title || 'Unknown Program'} (${app.status})`);
+    });
+    if (applications.length === 0) doc.fontSize(12).text('No applications found.');
+    doc.moveDown();
+    
+    doc.fontSize(16).text('Disbursements', { underline: true });
+    disbursements.forEach(d => {
+      doc.fontSize(12).text(`- ${d.releaseDate?.toISOString().slice(0, 10)} | BDT ${d.amount} | ${d.program?.title}`);
+    });
+    if (disbursements.length === 0) doc.fontSize(12).text('No disbursements found.');
+    doc.moveDown();
+    
+    doc.fontSize(16).text('Withdrawals', { underline: true });
+    withdrawals.forEach(w => {
+      doc.fontSize(12).text(`- ${w.createdAt?.toISOString().slice(0, 10)} | BDT ${w.amount} | ${w.method} (${w.status})`);
+    });
+    if (withdrawals.length === 0) doc.fontSize(12).text('No withdrawals found.');
+    
+    doc.end();
+  } catch (err) {
+    next(err);
+  }
+};
+

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
+import LoginSketchBg from '../components/LoginSketchBg';
 
 const initial = {
   email: '',
@@ -50,10 +51,19 @@ export default function RegisterStudent() {
   };
 
   return (
-    <div className="container" style={{ maxWidth: 560, margin: '2rem auto' }}>
-      <h1 className="page-title" style={{ textAlign: 'center' }}>Student Registration</h1>
-      <div className="card">
-        <form onSubmit={handleSubmit}>
+    <div className="login-page">
+      <div className="login-page-ambient" aria-hidden="true">
+        <LoginSketchBg />
+        <div className="login-page-mesh" />
+        <span className="login-page-orb login-page-orb--a" />
+        <span className="login-page-orb login-page-orb--b" />
+        <span className="login-page-orb login-page-orb--c" />
+      </div>
+      <div className="login-page-inner">
+        <div className="container" style={{ maxWidth: 560, margin: '2rem auto' }}>
+          <h1 className="page-title" style={{ textAlign: 'center' }}>Student Registration</h1>
+          <div className="login-page-card card">
+            <form onSubmit={handleSubmit}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', marginBottom: '0.35rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Email *</label>
@@ -124,9 +134,11 @@ export default function RegisterStudent() {
             {loading ? 'Registering...' : 'Register'}
           </button>
         </form>
-        <p style={{ marginTop: '1rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-          <Link to="/login">Back to login</Link>
-        </p>
+            <p style={{ marginTop: '1rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+              <Link to="/login">Back to login</Link>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

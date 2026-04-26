@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { API } from '../config.js';
 
 const AuthContext = createContext(null);
 
-const API = '/api';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);

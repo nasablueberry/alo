@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
+import { API } from '../../config.js';
 
-const API = '/api';
 
 const STATUS_LABELS = {
   unreviewed: 'Awaiting Review',

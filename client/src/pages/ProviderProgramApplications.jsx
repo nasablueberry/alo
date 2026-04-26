@@ -4,8 +4,8 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { uploadUrl } from '../utils/uploadUrl';
+import { API } from '../config.js';
 
-const API = '/api';
 
 const profileDocTypeLabel = (type) => {
   const m = {

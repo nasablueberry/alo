@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { API } from '../../config.js';
 
-const API = '/api';
 
 const PAYMENT_METHODS = [
   { value: 'bkash', label: 'bKash' },
@@ -71,6 +71,20 @@ export default function AdminDisburse() {
     const amt = Number(amount);
     if (!Number.isFinite(amt) || amt <= 0) {
       toast.error('Invalid amount');
+      return;
+    }
+    // enforce provider's per-beneficiary limit and remaining fund
+    const perBeneficiary = Number(modalApp.program?.amountPerBeneficiary || 0);
+    const remainingFund = Number(modalApp.program?.remainingFund ?? Infinity);
+    const allowedMax = Math.min(perBeneficiary > 0 ? perBeneficiary : Infinity, remainingFund);
+    if (Number.isFinite(allowedMax) && amt > allowedMax) {
+      toast.error(`Amount exceeds allowed maximum of ৳ ${allowedMax.toLocaleString()}`);
+      return;
+    }
+    // enforce student's payment preference if present
+    const studentPref = modalApp.paymentPreference?.method;
+    if (studentPref && paymentMethod !== studentPref) {
+      toast.error('Payment method must match student preference');
       return;
     }
     setBusyId(modalApp._id);
@@ -223,32 +237,64 @@ export default function AdminDisburse() {
               <label className="form-label" htmlFor="disb-amount">
                 {t('dash.disburseAmount')}
               </label>
-              <input
-                id="disb-amount"
-                className="form-input"
-                type="number"
-                min="1"
-                step="1"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                required
-              />
+              {/* determine allowed maximum from program settings */}
+              {(() => {
+                const per = Number(modalApp.program?.amountPerBeneficiary || 0);
+                const rem = Number(modalApp.program?.remainingFund ?? Infinity);
+                const maxAllowed = Math.min(per > 0 ? per : Infinity, rem);
+                return (
+                  <>
+                    <input
+                      id="disb-amount"
+                      className="form-input"
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      required
+                      max={Number.isFinite(maxAllowed) ? maxAllowed : undefined}
+                      aria-describedby="disb-amount-help"
+                    />
+                    {Number.isFinite(maxAllowed) && (
+                      <small id="disb-amount-help" style={{ display: 'block', marginTop: '0.35rem', color: '#475569' }}>
+                        Max allowed per provider: ৳ {maxAllowed.toLocaleString()}
+                      </small>
+                    )}
+                  </>
+                );
+              })()}
 
               <label className="form-label" htmlFor="disb-method">
                 {t('dash.disburseMethod')}
               </label>
-              <select
-                id="disb-method"
-                className="form-input"
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-              >
-                {PAYMENT_METHODS.map((m) => (
-                  <option key={m.value} value={m.value}>
-                    {m.label}
+              {/* If student specified a payment preference, only allow that method */}
+              {modalApp.paymentPreference?.method ? (
+                <select
+                  id="disb-method"
+                  className="form-input"
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  disabled
+                >
+                  <option value={modalApp.paymentPreference.method}>
+                    {methodLabel(modalApp.paymentPreference.method)}
                   </option>
-                ))}
-              </select>
+                </select>
+              ) : (
+                <select
+                  id="disb-method"
+                  className="form-input"
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                >
+                  {PAYMENT_METHODS.map((m) => (
+                    <option key={m.value} value={m.value}>
+                      {m.label}
+                    </option>
+                  ))}
+                </select>
+              )}
 
               <label className="form-label" htmlFor="disb-date">
                 {t('dash.disburseReleaseDate')}

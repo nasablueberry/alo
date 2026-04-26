@@ -4,8 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import eadsLogo from '../eadslogo.png';
+import { API } from '../config.js';
 
-const API = '/api';
 
 function Icon({ name }) {
   return (
@@ -194,7 +194,7 @@ export default function DashboardShell({ role }) {
 
   return (
     <div className="dash-shell">
-      {mobileOpen && (
+      {isMobile && mobileOpen && (
         <button
           type="button"
           className="dash-sidebar-backdrop"

@@ -1,5 +1,5 @@
 import express from 'express';
-import {
+import { generateStudentReport,
   getMyProfile,
   updateMyProfile,
   uploadDocument,
@@ -19,5 +19,6 @@ router.post('/documents', upload.single('document'), uploadDocument);
 router.get('/scholarship-history', getScholarshipHistory);
 router.get('/withdrawals', listMyWithdrawals);
 router.post('/withdraw', createWithdrawal);
+router.get('/report', generateStudentReport);
 
 export default router;

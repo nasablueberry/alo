@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { API } from '../config.js';
 
-const API = '/api';
 
 function formatWhen(iso) {
   if (!iso) return '—';
