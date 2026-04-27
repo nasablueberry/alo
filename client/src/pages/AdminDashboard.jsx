@@ -16,7 +16,7 @@ const REGION_BARS = [
 
 export default function AdminDashboard() {
   const { fetchWithAuth } = useAuth();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const [dashboard, setDashboard] = useState(null);
   const [programs, setPrograms] = useState([]);
   const [flaggedApps, setFlaggedApps] = useState([]);
@@ -79,7 +79,7 @@ export default function AdminDashboard() {
       const res = await fetchWithAuth(`${API}/admin/reports?${params.toString()}`);
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || 'Failed to generate report');
+        throw new Error(data.message || t('dash.reportFailedGen'));
       }
       const blob = await res.blob();
       const contentDisposition = res.headers.get('Content-Disposition') || '';
@@ -94,9 +94,9 @@ export default function AdminDashboard() {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      toast.success('Report downloaded');
+      toast.success(t('dash.reportDownloaded'));
     } catch (e) {
-      toast.error(e.message || 'Report generation failed');
+      toast.error(e.message || t('dash.reportFailed'));
     }
   };
 
@@ -197,9 +197,12 @@ export default function AdminDashboard() {
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
                 <h3 className="dash-card-h">{t('dash.duplicateAlerts')}</h3>
-                {flaggedApps.filter(a => a.fraudReviewStatus === 'unreviewed').length > 0 && (
+                {flaggedApps.filter((a) => a.fraudReviewStatus === 'unreviewed').length > 0 && (
                   <span className="fraud-admin-badge">
-                    {flaggedApps.filter(a => a.fraudReviewStatus === 'unreviewed').length} awaiting review
+                    {t('dash.fraudAwaitingReview').replace(
+                      '{n}',
+                      String(flaggedApps.filter((a) => a.fraudReviewStatus === 'unreviewed').length)
+                    )}
                   </span>
                 )}
               </div>
@@ -210,33 +213,33 @@ export default function AdminDashboard() {
           {flaggedApps.length === 0 ? (
             <p className="dash-muted dash-alert-hint" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <span className="material-symbols-outlined" style={{ fontSize: '1rem', color: '#16a34a' }}>check_circle</span>
-              No duplicate aid flags detected. All clear.
+              {t('dash.fraudAllClear')}
             </p>
           ) : (
             <>
               <div className="fraud-admin-stats">
                 <div className="fraud-admin-stat">
                   <span className="fraud-admin-stat-num" style={{ color: '#dc2626' }}>
-                    {flaggedApps.filter(a => a.fraudReviewStatus === 'unreviewed').length}
+                    {flaggedApps.filter((a) => a.fraudReviewStatus === 'unreviewed').length}
                   </span>
-                  <span className="fraud-admin-stat-label">Unreviewed</span>
+                  <span className="fraud-admin-stat-label">{t('dash.fraudUnreviewed')}</span>
                 </div>
                 <div className="fraud-admin-stat">
                   <span className="fraud-admin-stat-num" style={{ color: '#b91c1c' }}>
-                    {flaggedApps.filter(a => a.fraudReviewStatus === 'confirmed_fraud').length}
+                    {flaggedApps.filter((a) => a.fraudReviewStatus === 'confirmed_fraud').length}
                   </span>
-                  <span className="fraud-admin-stat-label">Confirmed Fraud</span>
+                  <span className="fraud-admin-stat-label">{t('dash.fraudConfirmed')}</span>
                 </div>
                 <div className="fraud-admin-stat">
                   <span className="fraud-admin-stat-num" style={{ color: '#16a34a' }}>
-                    {flaggedApps.filter(a => a.fraudReviewStatus === 'cleared').length}
+                    {flaggedApps.filter((a) => a.fraudReviewStatus === 'cleared').length}
                   </span>
-                  <span className="fraud-admin-stat-label">Cleared</span>
+                  <span className="fraud-admin-stat-label">{t('dash.fraudCleared')}</span>
                 </div>
               </div>
               <Link to="/admin/fraud" className="fraud-admin-review-link">
                 <span className="material-symbols-outlined" aria-hidden>arrow_forward</span>
-                Review flagged applications
+                {t('dash.fraudReviewApplications')}
               </Link>
             </>
           )}
@@ -262,7 +265,7 @@ export default function AdminDashboard() {
             <div>
               <p className="dash-quick-title">{t('dash.disbursements')}</p>
               <p className="dash-quick-sub">
-                ৳ {Number(dashboard.totalFundUtilized || 0).toLocaleString()}
+                ৳ {Number(dashboard.totalFundUtilized || 0).toLocaleString(locale)}
               </p>
             </div>
           </div>
@@ -301,7 +304,7 @@ export default function AdminDashboard() {
                   </td>
                   <td className="dash-muted-sm">{log.user?.email || '—'}</td>
                   <td className="dash-muted-sm">
-                    {log.createdAt ? new Date(log.createdAt).toLocaleString() : '—'}
+                    {log.createdAt ? new Date(log.createdAt).toLocaleString(locale) : '—'}
                   </td>
                 </tr>
               ))}
@@ -312,13 +315,16 @@ export default function AdminDashboard() {
 
       <section className="dash-card" style={{ marginTop: '1.25rem' }}>
         <div className="dash-card-head">
-          <h2 className="dash-card-h">Report Generation System</h2>
+          <h2 className="dash-card-h">{t('dash.reportGenTitle')}</h2>
           <button type="button" className="btn btn-primary" onClick={downloadReport}>
-            Download {report.format.toUpperCase()}
+            {t('dash.downloadFormat').replace(
+              '{format}',
+              report.format === 'pdf' ? t('dash.formatPdf') : t('dash.formatCsv')
+            )}
           </button>
         </div>
         <p className="dash-muted" style={{ marginBottom: '0.9rem' }}>
-          Generate downloadable reports by program, region, and time period.
+          {t('dash.reportGenLead')}
         </p>
         <div
           style={{
@@ -328,15 +334,15 @@ export default function AdminDashboard() {
           }}
         >
           <select value={report.type} onChange={(e) => onReportChange('type', e.target.value)}>
-            <option value="disbursements">Program disbursements</option>
-            <option value="regional">Regional impact</option>
+            <option value="disbursements">{t('dash.reportTypeDisbursements')}</option>
+            <option value="regional">{t('dash.reportTypeRegional')}</option>
           </select>
           <select value={report.format} onChange={(e) => onReportChange('format', e.target.value)}>
-            <option value="csv">CSV</option>
-            <option value="pdf">PDF</option>
+            <option value="csv">{t('dash.formatCsv')}</option>
+            <option value="pdf">{t('dash.formatPdf')}</option>
           </select>
           <select value={report.programId} onChange={(e) => onReportChange('programId', e.target.value)}>
-            <option value="">All programs</option>
+            <option value="">{t('dash.allPrograms')}</option>
             {programs.map((p) => (
               <option key={p._id} value={p._id}>
                 {p.title}
@@ -344,12 +350,18 @@ export default function AdminDashboard() {
             ))}
           </select>
           <input
-            placeholder="District (optional)"
+            placeholder={t('dash.districtOptional')}
             value={report.district}
             onChange={(e) => onReportChange('district', e.target.value)}
           />
-          <input type="date" value={report.from} onChange={(e) => onReportChange('from', e.target.value)} />
-          <input type="date" value={report.to} onChange={(e) => onReportChange('to', e.target.value)} />
+          <label className="dash-date-field">
+            <span className="dash-muted-sm">{t('dash.dateFrom')}</span>
+            <input type="date" value={report.from} onChange={(e) => onReportChange('from', e.target.value)} />
+          </label>
+          <label className="dash-date-field">
+            <span className="dash-muted-sm">{t('dash.dateTo')}</span>
+            <input type="date" value={report.to} onChange={(e) => onReportChange('to', e.target.value)} />
+          </label>
         </div>
       </section>
     </div>

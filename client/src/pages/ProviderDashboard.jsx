@@ -5,9 +5,16 @@ import { useLanguage } from '../context/LanguageContext';
 import { API } from '../config.js';
 
 
+function programStatusLabel(t, s) {
+  if (!s) return '—';
+  const k = 'dash.progStatus.' + String(s).toLowerCase();
+  const v = t(k);
+  return v === k ? s : v;
+}
+
 export default function ProviderDashboard() {
   const { fetchWithAuth, profile } = useAuth();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const [programs, setPrograms] = useState([]);
 
   useEffect(() => {
@@ -100,7 +107,7 @@ export default function ProviderDashboard() {
                       <div className="dash-program-head">
                         <h4>{p.title}</h4>
                         <span className={`badge badge-${p.status === 'active' ? 'active' : 'pending'}`}>
-                          {p.status}
+                          {programStatusLabel(t, p.status)}
                         </span>
                       </div>
                       <p className="dash-muted-xs">
@@ -111,10 +118,10 @@ export default function ProviderDashboard() {
                       </div>
                       <div className="dash-progress-labels">
                         <span>
-                          ৳ {(tf - rf).toLocaleString()} {t('dash.disbursedShort')}
+                          ৳ {(tf - rf).toLocaleString(locale)} {t('dash.disbursedShort')}
                         </span>
                         <span>
-                          ৳ {tf.toLocaleString()} {t('dash.totalShort')}
+                          ৳ {tf.toLocaleString(locale)} {t('dash.totalShort')}
                         </span>
                       </div>
                       <Link

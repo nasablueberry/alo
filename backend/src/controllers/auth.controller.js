@@ -7,7 +7,7 @@ import { sendEmail, templates } from '../utils/email.js';
 import { updateStudentFinancialNeedScore } from '../services/financialNeedScore.service.js';
 
 const generateToken = (id) =>
-  jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE || '7d' });
+  jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE || '7d' }); 
 
 export const registerStudent = async (req, res, next) => {
   try {

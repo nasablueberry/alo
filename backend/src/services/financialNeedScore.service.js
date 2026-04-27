@@ -1,21 +1,12 @@
 import StudentProfile from '../models/StudentProfile.model.js';
 
-/**
- * Scoring weights (must sum to 1.0)
- *
- * Component        Direction      Rationale
- * ─────────────────────────────────────────
- * income           lower = more need
- * family size      larger = more need
- * academic merit   higher CGPA/attendance = more deserving of aid
- * documents        more verified docs = more trust
- */
+
 const INCOME_WEIGHT     = 0.40;
 const FAMILY_WEIGHT     = 0.20;
 const ACADEMIC_WEIGHT   = 0.30;
 const DOCUMENT_WEIGHT   = 0.10;
 
-const MAX_INCOME_REF    = 50000;  // BDT — families above this are considered financially stable
+const MAX_INCOME_REF    = 50000;
 const MAX_FAMILY_SIZE   = 10;
 
 /**

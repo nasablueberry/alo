@@ -18,7 +18,7 @@ function Icon({ name }) {
 export default function DashboardShell({ role }) {
   const { logout, profile, user, fetchWithAuth } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const { lang, setLang, t } = useLanguage();
+  const { lang, setLang, t, locale } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -92,8 +92,8 @@ export default function DashboardShell({ role }) {
 
   const adminLinks = [
     { to: '/admin', end: true, icon: 'analytics', label: t('dash.systemAnalytics') },
-    { to: '/admin/fraud', icon: 'gpp_bad', label: 'Fraud Review' },
-    { to: '/admin/disburse', icon: 'payments', label: 'Disburse aid' },
+    { to: '/admin/fraud', icon: 'gpp_bad', label: t('dash.fraudReview') },
+    { to: '/admin/disburse', icon: 'payments', label: t('dash.disburseAid') },
     { to: '/admin/students', icon: 'groups', label: t('nav.students') },
     { to: '/admin/rejections', icon: 'gavel', label: t('rejections.nav') },
     { to: '/admin/providers', icon: 'corporate_fare', label: t('nav.providers') },
@@ -289,8 +289,8 @@ export default function DashboardShell({ role }) {
               type="button"
               className="dash-mini-toggle"
               onClick={toggleTheme}
-              title={theme === 'light' ? 'Dark mode' : 'Light mode'}
-              aria-label={theme === 'light' ? 'Dark mode' : 'Light mode'}
+              title={theme === 'light' ? t('dash.themeDark') : t('dash.themeLight')}
+              aria-label={theme === 'light' ? t('dash.themeDark') : t('dash.themeLight')}
             >
               <span className="material-symbols-outlined" aria-hidden>
                 {theme === 'light' ? 'dark_mode' : 'light_mode'}
@@ -325,11 +325,11 @@ export default function DashboardShell({ role }) {
             aria-label={
               isMobile
                 ? mobileOpen
-                  ? 'Close navigation'
-                  : 'Open navigation'
+                  ? t('dash.navClose')
+                  : t('dash.navOpen')
                 : navCollapsed
-                  ? 'Expand sidebar'
-                  : 'Collapse sidebar'
+                  ? t('dash.navExpand')
+                  : t('dash.navCollapse')
             }
             onClick={toggleSidebar}
             aria-expanded={isMobile ? mobileOpen : !navCollapsed}
@@ -392,7 +392,7 @@ export default function DashboardShell({ role }) {
                             <span className="dash-notif-item-title">{n.title}</span>
                             <span className="dash-notif-item-msg">{n.message}</span>
                             <span className="dash-notif-item-time">
-                              {n.createdAt ? new Date(n.createdAt).toLocaleString() : ''}
+                              {n.createdAt ? new Date(n.createdAt).toLocaleString(locale) : ''}
                             </span>
                           </button>
                         </li>

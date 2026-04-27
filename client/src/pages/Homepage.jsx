@@ -16,24 +16,22 @@ export default function Homepage() {
             <div className="new-hero-blob new-hero-blob-1" />
             <div className="new-hero-badge anim-fade-up">
               <span className="material-symbols-outlined scale-75" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-              <span className="new-hero-badge-text">Radically Transparent Funding</span>
+              <span className="new-hero-badge-text">{t('home.newHeroBadge')}</span>
             </div>
-            
+
             <h1 className="new-hero-title anim-fade-up anim-delay-1">
-              <span className="new-hero-title-highlight">Alokdaar:</span> Ensuring Education to All
+              <span className="new-hero-title-highlight">{t('home.heroTitleHighlight')}</span> {t('home.heroTitleRest')}
             </h1>
-            
-            <p className="new-hero-subtitle anim-fade-up anim-delay-2">
-              We bridge the gap between human potential and educational access through a verifiable, blockchain-backed aid ecosystem. Honest aid for honest growth.
-            </p>
-            
+
+            <p className="new-hero-subtitle anim-fade-up anim-delay-2">{t('home.heroSubtitle')}</p>
+
             <div className="new-hero-actions anim-fade-up anim-delay-3">
               <Link to="/register/student" className="new-btn-primary">
-                Start Your Application
+                {t('home.startApplication')}
               </Link>
-              <button className="new-btn-outline">
-                How We Verify
-              </button>
+              <a href="#how-it-works" className="new-btn-outline">
+                {t('home.howWeVerify')}
+              </a>
             </div>
 
             <svg className="hero-drawn-arrow" width="280" height="200" viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -48,7 +46,7 @@ export default function Homepage() {
               <path className="drawn-arrow-head" d="M 230,125 L 250,140 L 260,115" stroke="#1a1c1d" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
             </svg>
           </div>
-          
+
           <div className="new-hero-visual anim-fade-up anim-delay-2">
             <div className="new-hero-blob new-hero-blob-2" />
             <div className="new-hero-image-container">
@@ -57,15 +55,15 @@ export default function Homepage() {
                   <span className="material-symbols-outlined">volunteer_activism</span>
                 </div>
                 <div>
-                  <p className="top-card-title">New Grant Issued</p>
-                  <p className="top-card-subtitle">$2,400 to Sarah J.</p>
+                  <p className="top-card-title">{t('home.demoGrantTitle')}</p>
+                  <p className="top-card-subtitle">{t('home.demoGrantSubtitle')}</p>
                 </div>
               </div>
 
               <div className="new-hero-image-wrapper blob-shape-1">
                 <img
                   src={heroImage}
-                  alt="Young diverse Bangladeshi student smiling while studying"
+                  alt={t('home.heroImageAlt')}
                   className="new-hero-image"
                   loading="eager"
                 />
@@ -76,7 +74,7 @@ export default function Homepage() {
                   verified
                 </span>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span className="bottom-card-value" style={{ fontSize: '1.25rem' }}>Verified</span>
+                  <span className="bottom-card-value" style={{ fontSize: '1.25rem' }}>{t('home.heroVerified')}</span>
                 </div>
               </div>
             </div>
@@ -89,15 +87,15 @@ export default function Homepage() {
           <div className="stats-grid stats-grid-landing stats-grid--stagger">
             <div className="stat-item stat-item--pop">
               <span className="stat-value">12,450+</span>
-              <span className="stat-label">Students Assisted</span>
+              <span className="stat-label">{t('home.statStudentsAssisted')}</span>
             </div>
             <div className="stat-item stat-item--pop">
               <span className="stat-value">৳42.8M</span>
-              <span className="stat-label">Funds Disbursed</span>
+              <span className="stat-label">{t('home.statFundsDisbursed')}</span>
             </div>
             <div className="stat-item stat-item--pop">
               <span className="stat-value">100%</span>
-              <span className="stat-label">Transparency Rate</span>
+              <span className="stat-label">{t('home.statTransparencyRate')}</span>
             </div>
           </div>
         </div>
@@ -105,33 +103,31 @@ export default function Homepage() {
 
       <section id="how-it-works" className="section section-features section-conduit">
         <div className="container">
-          <h2 className="section-title section-title-editorial">The Conduit of Progress</h2>
-          <p className="section-subtitle">
-            A transparent and structured path from application to meaningful support.
-          </p>
+          <h2 className="section-title section-title-editorial">{t('home.conduitTitle')}</h2>
+          <p className="section-subtitle">{t('home.conduitSubtitle')}</p>
           <div className="bento-grid">
             <div className="feature-card bento-large feature-card--lift" style={{ textAlign: 'center' }}>
               <div className="feature-index" style={{ textAlign: 'left' }}>01</div>
-              <img src={cap3D} alt="Students 3D" className="asset-3d asset-3d-float" />
+              <img src={cap3D} alt="" className="asset-3d asset-3d-float" />
               <h3 style={{ marginTop: '0.5rem' }}>{t('home.students')}</h3>
               <p>{t('home.studentsDesc')}</p>
             </div>
             <div className="feature-card bento-accent feature-card--lift" style={{ textAlign: 'center' }}>
-              <img src={shield3D} alt="Providers 3D" className="asset-3d asset-3d-float" style={{ animationDelay: '-1.5s', maxWidth: '160px' }} />
+              <img src={shield3D} alt="" className="asset-3d asset-3d-float" style={{ animationDelay: '-1.5s', maxWidth: '160px' }} />
               <h3 style={{ marginTop: '0.5rem' }}>{t('home.providers')}</h3>
               <p>{t('home.providersDesc')}</p>
             </div>
             <div className="feature-card bento-half feature-card--lift" style={{ textAlign: 'center' }}>
-              <img src={funds3D} alt="Dynamic Funding 3D" className="asset-3d asset-3d-float" style={{ animationDelay: '-3s', maxWidth: '100px' }} />
-              <h3 style={{ marginTop: '0.5rem' }}>Dynamic Funding</h3>
-              <p>Budgeted programs allocate support fairly across eligible learners.</p>
+              <img src={funds3D} alt="" className="asset-3d asset-3d-float" style={{ animationDelay: '-3s', maxWidth: '100px' }} />
+              <h3 style={{ marginTop: '0.5rem' }}>{t('home.dynamicFunding')}</h3>
+              <p>{t('home.dynamicFundingDesc')}</p>
             </div>
             <div className="feature-card bento-half feature-card--lift">
               <div className="feature-icon" aria-hidden>
                 <span className="material-symbols-outlined">trending_up</span>
               </div>
-              <h3>Impact Tracking</h3>
-              <p>Every disbursement is tracked with status updates and clear reporting.</p>
+              <h3>{t('home.impactTracking')}</h3>
+              <p>{t('home.impactTrackingDesc')}</p>
             </div>
           </div>
         </div>
@@ -140,32 +136,30 @@ export default function Homepage() {
       <section className="section section-transparency">
         <div className="container transparency-wrap">
           <div className="transparency-main">
-            <h2 className="section-title section-title-left">Radical Transparency as a Standard.</h2>
-            <p className="transparency-text">
-              We provide real-time visibility into how aid moves from donor funds to student outcomes.
-            </p>
+            <h2 className="section-title section-title-left">{t('home.radicalTitle')}</h2>
+            <p className="transparency-text">{t('home.radicalLead')}</p>
             <ul className="trust-points">
-              <li>Third-party quality checks</li>
-              <li>Clear audit trails for every disbursement</li>
-              <li>Zero-hidden fee distribution model</li>
+              <li>{t('home.trustPoint1')}</li>
+              <li>{t('home.trustPoint2')}</li>
+              <li>{t('home.trustPoint3')}</li>
             </ul>
           </div>
           <div className="transparency-grid">
             <div className="feature-card feature-card--lift">
-              <h3>Direct Funding</h3>
-              <p>Support reaches students and institutions through verified channels.</p>
+              <h3>{t('home.directFunding')}</h3>
+              <p>{t('home.directFundingDesc')}</p>
             </div>
             <div className="feature-card feature-card--lift">
-              <h3>Student Journey</h3>
-              <p>Track progress from first application to scholarship completion.</p>
+              <h3>{t('home.studentJourney')}</h3>
+              <p>{t('home.studentJourneyDesc')}</p>
             </div>
             <div className="feature-card feature-card--lift">
-              <h3>Verification AI</h3>
-              <p>Identity and eligibility checks reduce fraud and improve trust.</p>
+              <h3>{t('home.verificationAi')}</h3>
+              <p>{t('home.verificationAiDesc')}</p>
             </div>
             <div className="feature-card feature-card--lift">
-              <h3>Global Security</h3>
-              <p>Modern safeguards protect student and provider information.</p>
+              <h3>{t('home.globalSecurity')}</h3>
+              <p>{t('home.globalSecurityDesc')}</p>
             </div>
           </div>
         </div>
@@ -174,14 +168,14 @@ export default function Homepage() {
       <section className="section section-cta">
         <div className="container">
           <div className="cta-box cta-box-strong cta-box--anim">
-            <h2 className="cta-title">Ready to change a life?</h2>
-            <p className="cta-text">Whether you are a student or a donor, your journey starts here.</p>
+            <h2 className="cta-title">{t('home.ctaTitle')}</h2>
+            <p className="cta-text">{t('home.ctaText')}</p>
             <div className="cta-actions">
               <Link to="/register/student" className="btn btn-amber">
-                Get Started Today
+                {t('home.getStartedToday')}
               </Link>
               <Link to="/login" className="btn btn-outline">
-                Log in
+                {t('nav.login')}
               </Link>
             </div>
           </div>

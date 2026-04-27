@@ -5,10 +5,30 @@ import { useLanguage } from '../context/LanguageContext';
 import StudentWithdrawPanel from '../components/StudentWithdrawPanel';
 import { API } from '../config.js';
 
+function payoutLabel(t, m) {
+  if (!m) return '—';
+  const k = 'dash.payout.' + String(m).toLowerCase();
+  const v = t(k);
+  return v === k ? m : v;
+}
+
+function disbStatusLabel(t, s) {
+  if (!s) return '—';
+  const k = 'dash.disbStatus.' + String(s).toLowerCase();
+  const v = t(k);
+  return v === k ? s : v;
+}
+
+function appStatusLabel(t, s) {
+  if (!s) return '—';
+  const k = 'dash.appStatus.' + String(s).toLowerCase();
+  const v = t(k);
+  return v === k ? s : v;
+}
 
 export default function StudentDashboard() {
   const { fetchWithAuth, profile, loadUser } = useAuth();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const location = useLocation();
   const [stats, setStats] = useState({ applications: [], disbursements: [] });
   const [withdrawals, setWithdrawals] = useState([]);
@@ -95,7 +115,7 @@ export default function StudentDashboard() {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error(error);
-      alert('Error downloading report');
+      alert(t('dash.downloadReportError'));
     } finally {
       setDownloading(false);
     }
@@ -114,7 +134,7 @@ export default function StudentDashboard() {
       : profile?.verificationStatus === 'rejected'
         ? t('dash.rejected')
         : profile?.verificationStatus === 'unverified'
-          ? 'Unverified'
+          ? t('dash.unverified')
           : t('dash.pending');
 
   const verificationPillClass =
@@ -140,7 +160,9 @@ export default function StudentDashboard() {
           <div className="dash-page-header-meta">
             <div>
               <p className="dash-page-name">{profile.fullName}</p>
-              <p className="dash-page-sub">ID: {profile.birthCertificateId}</p>
+              <p className="dash-page-sub">
+              {t('dash.idLabel')}: {profile.birthCertificateId}
+            </p>
             </div>
             <button 
               className="btn btn-secondary" 
@@ -149,7 +171,7 @@ export default function StudentDashboard() {
               style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}
             >
               <span className="material-symbols-outlined">download</span>
-              {downloading ? 'Downloading...' : 'Download Report (PDF)'}
+              {downloading ? t('dash.downloading') : t('dash.downloadReport')}
             </button>
           </div>
         )}
@@ -168,7 +190,8 @@ export default function StudentDashboard() {
               </div>
               <h2 className="dash-card-title">{profile?.institutionName || '—'}</h2>
               <p className="dash-muted">
-                {profile?.district}, {profile?.upazila} · CGPA {profile?.cgpa ?? '—'} ·{' '}
+                {profile?.district}, {profile?.upazila} · {t('dash.cgpaLabel')}{' '}
+                {profile?.cgpa ?? '—'} ·{' '}
                 {t('dash.attendanceShort')}: {profile?.attendancePercentage ?? '—'}%
               </p>
               {profile?.isAtRisk && profile?.atRiskReason && (
@@ -176,7 +199,7 @@ export default function StudentDashboard() {
               )}
               <div className="dash-stat-row">
                 <div>
-                  <p className="dash-stat-label">CGPA</p>
+                  <p className="dash-stat-label">{t('dash.cgpaLabel')}</p>
                   <p className="dash-stat-value">{profile?.cgpa ?? '—'}</p>
                 </div>
                 <div>
@@ -186,15 +209,15 @@ export default function StudentDashboard() {
                 <div>
                   <p className="dash-stat-label">{t('dash.totalAid')}</p>
                   <p className="dash-stat-value">
-                    ৳ {totalAid ? totalAid.toLocaleString() : '0'}
+                    ৳ {totalAid ? totalAid.toLocaleString(locale) : '0'}
                   </p>
                 </div>
                 <div>
-                  <p className="dash-stat-label">Account balance</p>
+                  <p className="dash-stat-label">{t('dash.accountBalance')}</p>
                   <p className="dash-stat-value">
                     ৳{' '}
                     {profile?.accountBalance != null
-                      ? Number(profile.accountBalance).toLocaleString()
+                      ? Number(profile.accountBalance).toLocaleString(locale)
                       : '0'}
                   </p>
                 </div>
@@ -305,7 +328,7 @@ export default function StudentDashboard() {
               {stats.applications.slice(0, 6).map((a) => (
                 <li key={a._id} className="dash-list-row">
                   <Link to="/student/applications">{a.program?.title || '—'}</Link>
-                  <span className={`badge badge-${a.status}`}>{a.status}</span>
+                  <span className={`badge badge-${a.status}`}>{appStatusLabel(t, a.status)}</span>
                 </li>
               ))}
             </ul>
@@ -343,10 +366,10 @@ export default function StudentDashboard() {
                 {stats.disbursements.slice(0, 5).map((d) => (
                   <li key={d._id} className="dash-list-row">
                     <span>
-                      ৳ {Number(d.amount).toLocaleString()} · {d.program?.title || '—'}
+                      ৳ {Number(d.amount).toLocaleString(locale)} · {d.program?.title || '—'}
                     </span>
                     <span className="dash-muted-sm">
-                      {d.paymentMethod} · {d.status}
+                      {payoutLabel(t, d.paymentMethod)} · {disbStatusLabel(t, d.status)}
                     </span>
                   </li>
                 ))}
@@ -363,9 +386,9 @@ export default function StudentDashboard() {
                 {withdrawals.slice(0, 6).map((w) => (
                   <li key={w._id} className="dash-list-row">
                     <span>
-                      ৳ {Number(w.amount).toLocaleString()} → {w.method}
+                      ৳ {Number(w.amount).toLocaleString(locale)} → {payoutLabel(t, w.method)}
                     </span>
-                    <span className="dash-muted-sm">{w.status}</span>
+                    <span className="dash-muted-sm">{disbStatusLabel(t, w.status)}</span>
                   </li>
                 ))}
               </ul>

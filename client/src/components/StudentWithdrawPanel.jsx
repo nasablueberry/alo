@@ -1,20 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { API } from '../config.js';
 
 
-const METHODS = [
-  { id: 'bkash', label: 'bKash' },
-  { id: 'nagad', label: 'Nagad' },
-  { id: 'rocket', label: 'Rocket' },
-  { id: 'bank', label: 'Bank' },
-];
-
 export default function StudentWithdrawPanel({ accountBalance, onSuccess }) {
   const { fetchWithAuth, loadUser } = useAuth();
   const { t } = useLanguage();
+  const methods = useMemo(
+    () => [
+      { id: 'bkash', label: t('dash.payout.bkash') },
+      { id: 'nagad', label: t('dash.payout.nagad') },
+      { id: 'rocket', label: t('dash.payout.rocket') },
+      { id: 'bank', label: t('dash.payout.bank') },
+    ],
+    [t]
+  );
   const [open, setOpen] = useState(false);
   const [method, setMethod] = useState('bkash');
   const [amount, setAmount] = useState('');
@@ -29,7 +32,7 @@ export default function StudentWithdrawPanel({ accountBalance, onSuccess }) {
   const bal = Math.max(0, Number(accountBalance) || 0);
   const canOpen = bal >= 1;
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setAmount('');
     setMobileNumber('');
     setBankName('');
@@ -38,14 +41,44 @@ export default function StudentWithdrawPanel({ accountBalance, onSuccess }) {
     setBranch('');
     setRoutingNumber('');
     setMethod('bkash');
-  };
+  }, []);
+
+  const closeModal = useCallback(() => {
+    if (busy) return;
+    setOpen(false);
+    resetForm();
+  }, [busy, resetForm]);
+
+  useEffect(() => {
+    if (!open) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e) => {
+      if (e.key === 'Escape') closeModal();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open, closeModal]);
 
   const submit = async (e) => {
     e.preventDefault();
     if (!canOpen) return;
+    const raw = Number(amount);
+    const amt = Math.floor(Number.isFinite(raw) ? raw : NaN);
+    if (!Number.isFinite(amt) || amt < 1) {
+      toast.error(t('dash.withdrawInvalidAmount'));
+      return;
+    }
+    if (amt > bal) {
+      toast.error(t('dash.withdrawExceedsBalance'));
+      return;
+    }
     setBusy(true);
     try {
-      const body = { method, amount: Number(amount) };
+      const body = { method, amount: amt };
       if (['bkash', 'nagad', 'rocket'].includes(method)) {
         body.mobileNumber = mobileNumber;
       } else {
@@ -87,13 +120,14 @@ export default function StudentWithdrawPanel({ accountBalance, onSuccess }) {
         {!canOpen && <p className="dash-muted-xs dash-withdraw-hint">{t('dash.withdrawNoBalance')}</p>}
       </div>
 
-      {open && (
+      {open &&
+        createPortal(
         <div className="eads-modal" role="dialog" aria-modal="true" aria-labelledby="withdraw-modal-title">
           <button
             type="button"
             className="eads-modal__backdrop"
             aria-label="Close"
-            onClick={() => !busy && setOpen(false)}
+            onClick={closeModal}
           />
           <div className="eads-modal__panel eads-modal__panel--withdraw">
             <div className="eads-modal__head">
@@ -109,7 +143,7 @@ export default function StudentWithdrawPanel({ accountBalance, onSuccess }) {
               <div className="eads-form-group">
                 <span className="form-label">{t('dash.withdrawMethod')}</span>
                 <div className="eads-method-grid">
-                  {METHODS.map((m) => (
+                  {methods.map((m) => (
                     <label key={m.id} className={`eads-method-chip${method === m.id ? ' eads-method-chip--active' : ''}`}>
                       <input
                         type="radio"
@@ -227,7 +261,7 @@ export default function StudentWithdrawPanel({ accountBalance, onSuccess }) {
                   type="button"
                   className="btn btn-secondary"
                   disabled={busy}
-                  onClick={() => setOpen(false)}
+                  onClick={closeModal}
                 >
                   {t('dash.cancel')}
                 </button>
@@ -238,7 +272,8 @@ export default function StudentWithdrawPanel({ accountBalance, onSuccess }) {
             </form>
           </div>
         </div>
-      )}
+        , document.body
+        )}
     </>
   );
 }

@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { API } from '../config.js';
-
 
 export default function ProgramsList() {
   const { fetchWithAuth } = useAuth();
+  const { t, locale } = useLanguage();
   const [programs, setPrograms] = useState([]);
   const [myApplications, setMyApplications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +32,7 @@ export default function ProgramsList() {
         }
       } catch (e) {
         console.error(e);
-        setError(e.message || 'Failed to load programs');
+        setError(e.message || t('student.loadError'));
       } finally {
         setLoading(false);
       }
@@ -51,14 +52,14 @@ export default function ProgramsList() {
   if (loading) {
     return (
       <div className="container">
-        <p className="dash-muted">Loading programs…</p>
+        <p className="dash-muted">{t('student.loadingPrograms')}</p>
       </div>
     );
   }
 
   return (
     <div className="container">
-      <h1 className="page-title">Available Scholarship Programs</h1>
+      <h1 className="page-title">{t('student.programsTitle')}</h1>
       {error && (
         <div className="card" style={{ background: 'var(--danger-soft)', color: 'var(--danger)', marginBottom: '1rem' }}>
           {error}
@@ -67,9 +68,9 @@ export default function ProgramsList() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {programs.length === 0 && !error ? (
           <div className="card">
-            <p>No open programs right now.</p>
+            <p>{t('student.noOpen')}</p>
             <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem', fontSize: '0.95rem' }}>
-              If you just set up the database, run the seed script so providers and sample scholarship programs are created.
+              {t('student.noOpenHint')}
             </p>
           </div>
         ) : (
@@ -82,22 +83,27 @@ export default function ProgramsList() {
             if (!hasApp) {
               action = (
                 <Link to={`/student/programs/${p._id}/apply`} className="btn btn-primary">
-                  Apply
+                  {t('student.apply')}
                 </Link>
               );
             } else if (isDraft) {
               action = (
                 <Link to={`/student/programs/${p._id}/apply`} className="btn btn-primary">
-                  Continue application
+                  {t('student.continueApplication')}
                 </Link>
               );
             } else {
               action = (
                 <span className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
-                  Applied
+                  {t('student.applied')}
                 </span>
               );
             }
+
+            const amt = p.amountPerBeneficiary != null ? Number(p.amountPerBeneficiary).toLocaleString(locale) : '—';
+            const deadline = p.applicationDeadline
+              ? new Date(p.applicationDeadline).toLocaleDateString(locale)
+              : '—';
 
             return (
               <div
@@ -117,10 +123,11 @@ export default function ProgramsList() {
                     </p>
                   )}
                   <p style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
-                    BDT {p.amountPerBeneficiary?.toLocaleString()} per beneficiary · Deadline:{' '}
-                    {p.applicationDeadline ? new Date(p.applicationDeadline).toLocaleDateString() : '—'}
+                    {t('student.perBeneficiary').replace('{n}', amt)} · {t('student.deadline')}: {deadline}
                   </p>
-                  {isDraft && <p style={{ fontSize: '0.85rem', color: 'var(--amber)', marginTop: '0.35rem' }}>Draft — finish and submit to the provider.</p>}
+                  {isDraft && (
+                    <p style={{ fontSize: '0.85rem', color: 'var(--amber)', marginTop: '0.35rem' }}>{t('student.draftNote')}</p>
+                  )}
                 </div>
                 {action}
               </div>
