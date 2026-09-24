@@ -70,7 +70,7 @@ export default function Homepage() {
               </div>
 
               <div className="new-hero-floating-card bottom-card" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.75rem', padding: '1.25rem 1.5rem' }}>
-                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1", fontSize: '2.5rem', color: '#008558' }}>
+                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1", fontSize: '2.5rem', color: 'var(--accent)' }}>
                   verified
                 </span>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
